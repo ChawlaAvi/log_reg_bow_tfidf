@@ -1,0 +1,1 @@
+{"bow": {"add_bias": false, "lr": 0.001, "reg_const": 1.0}, "tf-idf": {"add_bias": false, "lr": 0.001, "reg_const": 1.0}}
