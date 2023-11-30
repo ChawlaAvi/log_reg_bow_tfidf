@@ -33,7 +33,7 @@ def readfiles(dir):
             f = open(i, 'r', encoding='utf-8')
             files_text.append(f.read())
         except:
-            print("Could not read %s." % i)
+            print(f"Could not read {i}.")
         finally:
             f.close()
 
@@ -45,10 +45,8 @@ def readfiles(dir):
 # Regex for removing punctuation
 _regex = re.compile('^[{0}]+|[{0}]+$'.format(string.punctuation))
 
-# Read stopwords from file
-_stopwords_file = open('stopwords', 'r')
-_stopwords = set(_stopwords_file.read().split())
-_stopwords_file.close()
+with open('stopwords', 'r') as _stopwords_file:
+    _stopwords = set(_stopwords_file.read().split())
 
 
 def extract_words(s):
@@ -65,10 +63,7 @@ def extract_words(s):
     # Convert the data the data into normal for (Eg: 'ç' to 'c') and lowercase it.
     s = unicodedata.normalize('NFKD', s).lower()
 
-    # Replace the punctuation with a space using the _regex and filter stopwords.
-    wordlist = [w for w in _regex.sub(' ', s).split() if w not in _stopwords]
-
-    return wordlist
+    return [w for w in _regex.sub(' ', s).split() if w not in _stopwords]
 
 
 class BagOfWordsFeatureExtractor(object):
@@ -127,31 +122,25 @@ class BagOfWordsFeatureExtractor(object):
                 ''' END CODE FOR THIS LOOP '''
 
 
-        # A set of words with frequency less than 'self.min_freq'
-        remove_words = set()
-
         # Check frequency of each word and add to 'remove_words'
         # if it's frequency is below self.min_freq
 
         ''' YOUR CODE HERE '''
-        for i in word_freq:
-            if word_freq[i] < self.min_freq:
-                remove_words.add(i)
-                
+        remove_words = {i for i, value in word_freq.items() if value < self.min_freq}
         for i in remove_words:
             del word_freq[i]
-            
+
 
         # Delete the words in 'remove_words' from 'word_freq'
 
 
         # Fill 'self.word_to_idx' and 'self.idx_to_word' for
         # each word in 'word_freq' (dicts are explained above)
-        
+
         for idx,i in enumerate(word_freq):
             self.word_to_idx[i] = idx
             self.idx_to_word[idx] = i
-            
+
 
 
         ''' END YOUR CODE HERE '''
@@ -282,33 +271,25 @@ class TfIdfFeatureExtractor(object):
             # it should be ignored. We use the set() data structure to achieve this.
             for w in set(words):
                 ''' YOUR CODE HERE '''
-                
-                if words.count(w) >= 1:
-                    doc_word_freq[w] = 1
-                else:
-                    doc_word_freq[w] = 0
-                    
+
+                doc_word_freq[w] = 1 if words.count(w) >= 1 else 0
                 ''' END CODE FOR THIS LOOP '''
 
-        # A set of words with total frequency less than 'self.min_freq'
-        remove_words = set()
-
         ''' YOUR CODE HERE '''
-        for i in total_word_freq:
-            if total_word_freq[i] < self.min_freq:
-                remove_words.add(i)
-         
+        remove_words = {
+            i for i, value in total_word_freq.items() if value < self.min_freq
+        }
         for i in remove_words:
             del total_word_freq[i]
             del doc_word_freq[i]
-            
-        
+
+
 
         # Check frequency of each word and add to 'remove_words'
         # Delete the words in 'remove_words' from 'total_word_freq' and
         # 'doc_word_freq'.
 
-        
+
         self.idf =  np.zeros(len(doc_word_freq))
         # Create a numpy array to store frequencies from which
         # we can create the 'self.idf' preprocessed numpy array.
@@ -317,7 +298,7 @@ class TfIdfFeatureExtractor(object):
         # For each word in 'doc_word_freq' dict, update
         # 'self.word_to_idx' and 'self.idx_to_word' and
         # 'word_freq_tensor'.
-        
+
         for idx,i in enumerate(doc_word_freq):
             self.word_to_idx[i] = idx
             self.idx_to_word[idx] = i
@@ -326,7 +307,7 @@ class TfIdfFeatureExtractor(object):
                 self.idf[idx] = log(num_docs/doc_word_freq[i])
             except:
                 pass
-            
+
 
         # Calculate 'self.idf' (see hint.pdf for formula)
 
@@ -386,7 +367,4 @@ class TfIdfFeatureExtractor(object):
 
             ''' END CODE FOR THIS LOOP '''
 
-        # Calculate the Tf-Idf features.
-        features = tf * self.idf
-
-        return features
+        return tf * self.idf
