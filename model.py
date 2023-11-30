@@ -120,9 +120,7 @@ class LogisticRegression(object):
         else:
             score = np.dot(X_batch, self.weights)
 
-        predictions = predict_func(score)
-
-        return predictions
+        return predict_func(score)
 
 
     def score(self, X_test, Y_test):
@@ -136,9 +134,7 @@ class LogisticRegression(object):
         """
         Y_test=Y_test.reshape(-1,1)
         Y_pred = self.predict(X_test)
-        accuracy = 1 - np.float(np.count_nonzero(Y_pred - Y_test)) / X_test.shape[0]
-
-        return accuracy
+        return 1 - np.float(np.count_nonzero(Y_pred - Y_test)) / X_test.shape[0]
 
 
     def train(self,
